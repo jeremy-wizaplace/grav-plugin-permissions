@@ -48,48 +48,6 @@ class PermissionsPlugin extends Plugin
         if ($this->isAdmin()) {
             return;
         }
-
-        // Enable the main event we are interested in
-        $this->enable([
-            'onPageInitialized' => ['onPageInitialized', 1000]
-        ]);
-    }
-
-    /**
-     * Check if site/page is private and user have correct role assigned
-     */
-    public function onPageInitialized()
-    {
-        // Get topParent if any
-        $page = $this->grav['page']->topParent()&&$this->grav['page']->topParent()->isPage()?$this->grav['page']->topParent():$this->grav['page'];
-        $header = $page->header();
-
-        // Validate user is logged in
-        if ($this->shouldRedirect($header)) {
-            $this->grav['page']->modifyHeader('access', array('site.login' => false));
-            return;
-        }
-
-        $access = Utils::getDotNotation(isset($header->access) ? (array)$header->access : [], 'site');
-        if (!$access) {
-            return;
-        }
-
-        $groups = $this->grav['user']->groups;
-        if (!$groups) {
-            $this->grav['page']->modifyHeader('access', array('site.login' => false));
-            return;
-        }
-
-        // Validate user access groups vs page access
-        foreach ($groups as $group) {
-            if ((bool)Utils::getDotNotation($access, $group)) {
-                return;
-            }
-        }
-
-        // Deny access if group validation was not successful
-        $this->grav['page']->modifyHeader('access', array('site.login' => false));
     }
 
     private function shouldRedirect($header) {
